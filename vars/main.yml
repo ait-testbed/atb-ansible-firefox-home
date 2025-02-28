@@ -1,2 +1,2 @@
----
-# vars file for .
+install_user: "{{ install_user }}"
+firefox_proxy_address: "{{ firefox_proxy_address }}"

@@ -1,2 +1,141 @@
+## tasks/main.yml
 ---
-# tasks file for .
+- name: Ensure dependencies are installed
+  apt:
+    name: ["tar", "wget"]
+    state: present
+  become: yes
+
+- name: Create local Firefox directory
+  file:
+    path: "/home/{{ install_user }}/.local/firefox"
+    state: directory
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0755'
+
+- name: Download and extract Firefox
+  unarchive:
+    src: "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
+    dest: "/home/{{ install_user }}/.local/firefox"
+    remote_src: yes
+    extra_opts: ["--strip-components=1"]
+  become: no
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+- name: Create Firefox desktop entry
+  copy:
+    dest: "/home/{{ install_user }}/.local/share/applications/firefox.desktop"
+    content: |
+      [Desktop Entry]
+      Name=Firefox
+      Exec=/home/{{ install_user }}/.local/firefox/firefox %u
+      Terminal=false
+      Type=Application
+      Icon=/home/{{ install_user }}/.local/firefox/browser/chrome/icons/default/default128.png
+      Categories=Network;WebBrowser;
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0644'
+
+- name: Create Firefox desktop entry
+  copy:
+    dest: "/home/{{ install_user }}/Desktop/firefox.desktop"
+    content: |
+      [Desktop Entry]
+      Name=Firefox
+      Exec=/home/{{ install_user }}/.local/firefox/firefox %u
+      Terminal=false
+      Type=Application
+      Icon=/home/{{ install_user }}/.local/firefox/browser/chrome/icons/default/default128.png
+      Categories=Network;WebBrowser;
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0644'
+
+- name: Ensure profile directory exists
+  file:
+    path: "/home/{{ install_user }}/.mozilla/firefox"
+    state: directory
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0755'
+
+
+- name: Find Firefox profile folder
+  find:
+    paths: "/home/{{ install_user }}/.mozilla/firefox"
+    patterns: "????????.default-release"
+    recurse: no
+  register: firefox_profiles
+
+- name: Set the profile directory
+  set_fact:
+    firefox_profile: "{{ firefox_profiles.files[0].path | basename }}"
+
+
+- name: Generate logins.json for stored credentials
+  copy:
+    dest: "/home/{{ install_user }}/.mozilla/{{ firefox_profile }}/logins.json"
+    content: |
+      {
+        "nextId": 2,
+        "logins": [
+          {
+            "id": 1,
+            "hostname": "https://www.linkedin.com",
+            "httpRealm": null,
+            "formSubmitURL": "https://www.linkedin.com",
+            "usernameField": "",
+            "passwordField": "",
+            "encryptedUsername": "MEIEEPgAAAAAAAAAAAAAAAAAAAEwFAYIKoZIhvcNAwcECJxdsXMWJcPeBBgJ+jp7p/DIkwHYWThVrMejkGPQX2xBg/A=",
+            "encryptedPassword": "MDoEEPgAAAAAAAAAAAAAAAAAAAEwFAYIKoZIhvcNAwcECA6xF5dIRpwcBBDngUvlsNf+jLah7COGJ485",
+            "guid": "{b3c3ade7-5d2d-4977-a277-ecd0c1bfb688}",
+            "encType": 1,
+            "timeCreated": 1740752539937,
+            "timeLastUsed": 1740752546775,
+            "timePasswordChanged": 1740752546775,
+            "timesUsed": 2,
+            "syncCounter": 2,
+            "everSynced": false,
+            "encryptedUnknownFields": null
+          }
+        ],
+        "potentiallyVulnerablePasswords": [],
+        "dismissedBreachAlertsByLoginGUID": {},
+        "version": 3
+      }
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0600'
+
+- name: Create Proxy Auto-Configuration (PAC) file for Firefox
+  copy:
+    content: |
+      function FindProxyForURL(url, host) {
+          if (url.indexOf("http://") == 0 || url.indexOf("https://") == 0) {
+              return "PROXY {{ firefox_proxy_address }}";
+          }
+          return "DIRECT";
+      }
+    dest: "/home/{{ install_user }}/proxy.pac"
+    mode: '0644'
+  when: firefox_proxy_address is defined
+
+- name: Configure Firefox to use the PAC file through user.js
+  lineinfile:
+    path: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/user.js"
+    line: 'user_pref("network.proxy.autoconfig_url", "file:///home/{{ install_user }}/proxy.pac");'
+    create: yes
+    backup: yes
+  when: firefox_proxy_address is defined
+
+
+
+- name: Open Firefox on DuckDuckGo to have a session store
+  command: "/home/{{ install_user }}/.local/firefox/firefox https://duckduckgo.com"
+  async: 1
+  poll: 0
+
+
