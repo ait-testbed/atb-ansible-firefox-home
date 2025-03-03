@@ -14,7 +14,7 @@
     state: directory
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
-    mode: '0755'
+    mode: '0777'
 
 - name: Download and extract Firefox as the instal user
   become: yes
