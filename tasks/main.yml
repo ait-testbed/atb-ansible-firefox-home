@@ -30,8 +30,6 @@
 
 
 - name: Create directory for Firefox desktop entry
-  become: yes
-  become_user: "{{ install_user }}"
   file:
     path: "/home/{{ install_user }}/.local/share/applications"
     state: directory
@@ -53,6 +51,15 @@
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
     mode: '0644'
+
+- name: Create directory for Firefox desktop entry
+  file:
+    path: "/home/{{ install_user }}/Desktop"
+    state: directory
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0755'
+
 
 - name: Create Firefox desktop entry
   copy:
