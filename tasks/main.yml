@@ -14,9 +14,9 @@
     state: directory
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
-    mode: '0777'
+    mode: '0755'
 
-- name: Download and extract Firefox as the instal user
+- name: Download and extract Firefox as the install user
   become: yes
   become_user: "{{ install_user }}"
   unarchive:
@@ -26,6 +26,18 @@
     extra_opts: ["--strip-components=1"]
   vars:
     ansible_python_interpreter: /usr/bin/python3
+
+
+
+- name: Create directory for Firefox desktop entry
+  become: yes
+  become_user: "{{ install_user }}"
+  file:
+    path: "/home/{{ install_user }}/.local/share/applications"
+    state: directory
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0755'
 
 - name: Create Firefox desktop entry
   copy:
