@@ -14,7 +14,9 @@
     group: "{{ install_user }}"
     mode: '0755'
 
-- name: Download and extract Firefox
+- name: Download and extract Firefox as the instal user
+  become: yes
+  become_user: "{{ install_user }}"
   unarchive:
     src: "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
     dest: "/home/{{ install_user }}/.local/firefox"
