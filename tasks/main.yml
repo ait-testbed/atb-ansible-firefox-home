@@ -106,15 +106,13 @@
   shell: bash -c "source ~/.bashrc"
   become_user: "{{ install_user }}"
 
-
-
 - name: Ensure Firefox profile directory exists
-  shell:  bash -c "firefox --headless"
+  command: /home/judy/.local/share/firefox/firefox --headless
   become_user: "{{ install_user }}"
 
 
 - name: Stop Firefox if running
-  command: bash -c "pkill firefox"
+  command: pkill firefox
   ignore_errors: yes
 
 
