@@ -88,9 +88,17 @@
 - name: Find Firefox profile folder
   find:
     paths: "/home/{{ install_user }}/.mozilla/firefox"
-    patterns: "????????.default-release"
+    patterns: "*.default-release"
     recurse: no
   register: firefox_profiles
+
+- name: Debug firefox profiles
+  debug:
+    var: install_user
+
+- name: Debug firefox profiles
+  debug:
+    var: firefox_profiles
 
 - name: Set the profile directory
   set_fact:
