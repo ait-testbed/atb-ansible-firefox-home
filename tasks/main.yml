@@ -86,7 +86,7 @@
 - name: Create a symlink for Firefox in ~/.local/bin
   become: yes
   file:
-    src: "/home/{{ install_user }}/.local/share/firefox/firefox"
+    src: "/home/{{ install_user }}/.local/share/firefox"
     dest: "/home/{{ install_user }}/.local/bin/firefox"
     state: link
     force: yes
