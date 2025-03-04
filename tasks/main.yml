@@ -76,7 +76,7 @@
 
 - name: Create directory .local/bin
   file:
-    path: "/home/{{ install_user }}/.local.bin"
+    path: "/home/{{ install_user }}/.local/bin"
     state: directory
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
@@ -87,7 +87,7 @@
   become: yes
   file:
     src: "/home/{{ install_user }}/.local/share/firefox/firefox"
-    dest: "/home/{{ install_user }}/.local/bin"
+    dest: "/home/{{ install_user }}/.local/bin/firefox"
     state: link
     force: yes
   become_user: "{{ install_user }}"
