@@ -2,7 +2,7 @@
 ---
 - name: Ensure dependencies are installed
   apt:
-    name: ["tar", "wget"]
+    name: ["tar", "wget", "packagekit-gtk3-module", "libasound2"]
     state: present
   become: yes
 
@@ -105,19 +105,17 @@
 - name: Reload .bashrc for immediate effect
   shell: bash -c "source ~/.bashrc"
   become_user: "{{ install_user }}"
-  changed_when: false
+
 
 
 - name: Ensure Firefox profile directory exists
-  command: bash -c "firefox --headless"
+  shell:  bash -c "firefox --headless"
   become_user: "{{ install_user }}"
-  changed_when: false
+
 
 - name: Stop Firefox if running
-  command: pkill firefox
+  command: bash -c "pkill firefox"
   ignore_errors: yes
-  changed_when: false
-
 
 
 - name: Find Firefox profile folder
