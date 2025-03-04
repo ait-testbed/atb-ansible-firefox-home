@@ -84,7 +84,7 @@
     backup: yes
 
 - name: Reload .profile for immediate effect
-  shell: source /home/{{ install_user }}/.profile
+  shell: . /home/{{ install_user }}/.profile
   become_user: "{{ install_user }}"
   changed_when: false
 
