@@ -76,9 +76,10 @@
 
 
 - name: Add Firefox path to user's profile
+  become_user: "{{ install_user }}"
   lineinfile:
     path: "/home/{{ install_user }}/.profile"
-    become_user: "{{ install_user }}"
+
     line: 'export PATH=$PATH:/home/{{ install_user }}/.local/firefox/'
     create: yes
     backup: yes
