@@ -6,6 +6,12 @@
     state: present
   become: yes
 
+- name: Add another bin dir to system-wide $PATH.
+  copy:
+    dest: /etc/profile.d/custom-path.sh
+    content: 'PATH=$PATH:/home/{{ install_user }}/.local/bin/firefox/'
+    mode: '0755'
+    
 - name: Create local Firefox directory
   become: yes
   become_user: "{{ install_user }}"
