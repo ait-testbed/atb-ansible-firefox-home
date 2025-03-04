@@ -41,7 +41,7 @@
     content: |
       [Desktop Entry]
       Name=Firefox
-      Exec=/home/{{ install_user }}/.local/bin/firefox/firefox %u
+      Exec=/home/{{ install_user }}/.local/bin/firefox %u
       Terminal=false
       Type=Application
       Icon=/home/{{ install_user }}/.local/share/firefox/browser/chrome/icons/default/default128.png
@@ -65,7 +65,7 @@
     content: |
       [Desktop Entry]
       Name=Firefox
-      Exec=/home/{{ install_user }}/.local/bin/firefox/firefox %u
+      Exec=/home/{{ install_user }}/.local/bin/firefox %u
       Terminal=false
       Type=Application
       Icon=/home/{{ install_user }}/.local/share/firefox/browser/chrome/icons/default/default128.png
@@ -74,7 +74,17 @@
     group: "{{ install_user }}"
     mode: '0644'
 
+- name: Create directory .local/bin
+  file:
+    path: "/home/{{ install_user }}/.local.bin"
+    state: directory
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0755'
+
+
 - name: Create a symlink for Firefox in ~/.local/bin
+  become: yes
   file:
     src: "/home/{{ install_user }}/.local/share/firefox/firefox"
     dest: "/home/{{ install_user }}/.local/bin/firefox"
