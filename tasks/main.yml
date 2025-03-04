@@ -79,7 +79,7 @@
   become_user: "{{ install_user }}"
   lineinfile:
     path: "/home/{{ install_user }}/.profile"
-    line: 'export PATH=$PATH:/home/{{ install_user }}/.local/bin/firefox/'
+    line: 'PATH=$PATH:/home/{{ install_user }}/.local/bin/firefox/'
     create: yes
     backup: yes
 
