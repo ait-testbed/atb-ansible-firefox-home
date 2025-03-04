@@ -10,7 +10,7 @@
   become: yes
   become_user: "{{ install_user }}"
   file:
-    path: "/home/{{ install_user }}/.local/firefox"
+    path: "/home/{{ install_user }}/.local/bin/firefox"
     state: directory
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
@@ -21,7 +21,7 @@
   become_user: "{{ install_user }}"
   unarchive:
     src: "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
-    dest: "/home/{{ install_user }}/.local/firefox"
+    dest: "/home/{{ install_user }}/.local/bin/firefox"
     remote_src: yes
     extra_opts: ["--strip-components=1"]
   vars:
@@ -41,10 +41,10 @@
     content: |
       [Desktop Entry]
       Name=Firefox
-      Exec=/home/{{ install_user }}/.local/firefox/firefox %u
+      Exec=/home/{{ install_user }}/.local/bin/firefox/firefox %u
       Terminal=false
       Type=Application
-      Icon=/home/{{ install_user }}/.local/firefox/browser/chrome/icons/default/default128.png
+      Icon=/home/{{ install_user }}/.local/bin/firefox/browser/chrome/icons/default/default128.png
       Categories=Network;WebBrowser;
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
@@ -65,10 +65,10 @@
     content: |
       [Desktop Entry]
       Name=Firefox
-      Exec=/home/{{ install_user }}/.local/firefox/firefox %u
+      Exec=/home/{{ install_user }}/.local/bin/firefox/firefox %u
       Terminal=false
       Type=Application
-      Icon=/home/{{ install_user }}/.local/firefox/browser/chrome/icons/default/default128.png
+      Icon=/home/{{ install_user }}/.local/bin/firefox/browser/chrome/icons/default/default128.png
       Categories=Network;WebBrowser;
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
@@ -79,8 +79,7 @@
   become_user: "{{ install_user }}"
   lineinfile:
     path: "/home/{{ install_user }}/.profile"
-
-    line: 'export PATH=$PATH:/home/{{ install_user }}/.local/firefox/'
+    line: 'export PATH=$PATH:/home/{{ install_user }}/.local/bin/firefox/'
     create: yes
     backup: yes
 
