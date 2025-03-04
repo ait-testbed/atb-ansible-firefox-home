@@ -27,8 +27,6 @@
   vars:
     ansible_python_interpreter: /usr/bin/python3
 
-
-
 - name: Create directory for Firefox desktop entry
   file:
     path: "/home/{{ install_user }}/.local/share/applications"
@@ -80,16 +78,16 @@
 - name: Add Firefox path to user's profile
   lineinfile:
     path: "/home/{{ install_user }}/.profile"
+    become_user: "{{ install_user }}"
     line: 'export PATH=$PATH:/home/{{ install_user }}/.local/firefox/'
     create: yes
-  become_user: "{{ install_user }}"
-  backup: yes
+    backup: yes
 
 - name: Reload .profile for immediate effect
   shell: source /home/{{ install_user }}/.profile
   become_user: "{{ install_user }}"
   changed_when: false
-  
+
 - name: Check updated PATH
   command: echo $PATH
   register: path_output
