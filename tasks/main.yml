@@ -76,13 +76,16 @@
     group: "{{ install_user }}"
     mode: '0644'
 
-- name: Ensure profile directory exists
-  file:
-    path: "/home/{{ install_user }}/.mozilla/firefox"
-    state: directory
-    owner: "{{ install_user }}"
-    group: "{{ install_user }}"
-    mode: '0755'
+- name: Ensure Firefox profile directory exists
+  command: firefox --headless
+  become_user: "{{ install_user }}"
+  changed_when: false
+
+- name: Stop Firefox if running
+  command: pkill firefox
+  ignore_errors: yes
+  changed_when: false
+
 
 
 - name: Find Firefox profile folder
@@ -162,10 +165,5 @@
   when: firefox_proxy_address is defined
 
 
-
-- name: Open Firefox on DuckDuckGo to have a session store
-  command: "/home/{{ install_user }}/.local/firefox/firefox https://duckduckgo.com"
-  async: 1
-  poll: 0
 
 
