@@ -1,3 +1,2 @@
----
-# defaults file for .
 install_user: "judy"
+firefox_proxy_address: ""  # No proxy by default

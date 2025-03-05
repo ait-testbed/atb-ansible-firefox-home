@@ -1,116 +1,145 @@
-## tasks/main.yml
 ---
 - name: Ensure dependencies are installed
-  apt:
-    name: ["tar", "wget"]
+  ansible.builtin.apt:
+    name: 
+      - tar
+      - wget
+      - packagekit-gtk3-module
+      - libasound2
+      - xvfb
+      - libegl1
+      - mesa-utils
+      - dbus-x11
     state: present
   become: yes
 
-- name: Create local Firefox directory
-  become: yes
-  become_user: "{{ install_user }}"
-  file:
-    path: "/home/{{ install_user }}/.local/firefox"
+- name: Define common paths and user
+  set_fact:
+    firefox_dir: "/home/{{ install_user }}/.local/share/firefox"
+    firefox_bin_dir: "/home/{{ install_user }}/.local/bin"
+    applications_dir: "/home/{{ install_user }}/.local/share/applications"
+    desktop_dir: "/home/{{ install_user }}/Desktop"
+    firefox_exec: "/home/{{ install_user }}/.local/share/firefox/firefox"
+    firefox_desktop_content: |
+      [Desktop Entry]
+      Name=Firefox
+      Exec="/home/{{ install_user }}/.local/bin/firefox %u
+      Terminal=false
+      Type=Application
+      Icon=/home/{{ install_user }}/.local/share/firefox/browser/chrome/icons/default/default128.png
+      Categories=Network;WebBrowser;
+
+- name: Create necessary directories
+  ansible.builtin.file:
+    path: "{{ item }}"
     state: directory
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
     mode: '0755'
+  loop:
+    - "{{ firefox_dir }}"
+    - "{{ firefox_bin_dir }}"
+    - "{{ applications_dir }}"
+    - "{{ desktop_dir }}"
+  become: true
 
-- name: Download and extract Firefox as the install user
+
+- name: Download Firefox tarball and extract it
+  ansible.builtin.get_url:
+    url: "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
+    dest: "/home/{{ install_user }}/firefox-latest.tar.bz2"
   become: yes
   become_user: "{{ install_user }}"
-  unarchive:
-    src: "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
-    dest: "/home/{{ install_user }}/.local/firefox"
+
+- name: Extract Firefox tarball as the install user
+  ansible.builtin.unarchive:
+    src: "/home/{{ install_user }}/firefox-latest.tar.bz2"
+    dest: "{{ firefox_dir }}"
     remote_src: yes
-    extra_opts: ["--strip-components=1"]
-  vars:
-    ansible_python_interpreter: /usr/bin/python3
-
-
-
-- name: Create directory for Firefox desktop entry
-  file:
-    path: "/home/{{ install_user }}/.local/share/applications"
-    state: directory
-    owner: "{{ install_user }}"
-    group: "{{ install_user }}"
-    mode: '0755'
-
-- name: Create Firefox desktop entry
-  copy:
-    dest: "/home/{{ install_user }}/.local/share/applications/firefox.desktop"
-    content: |
-      [Desktop Entry]
-      Name=Firefox
-      Exec=/home/{{ install_user }}/.local/firefox/firefox %u
-      Terminal=false
-      Type=Application
-      Icon=/home/{{ install_user }}/.local/firefox/browser/chrome/icons/default/default128.png
-      Categories=Network;WebBrowser;
-    owner: "{{ install_user }}"
-    group: "{{ install_user }}"
-    mode: '0644'
-
-- name: Create directory for Firefox desktop entry
-  file:
-    path: "/home/{{ install_user }}/Desktop"
-    state: directory
-    owner: "{{ install_user }}"
-    group: "{{ install_user }}"
-    mode: '0755'
-
-
-- name: Create Firefox desktop entry
-  copy:
-    dest: "/home/{{ install_user }}/Desktop/firefox.desktop"
-    content: |
-      [Desktop Entry]
-      Name=Firefox
-      Exec=/home/{{ install_user }}/.local/firefox/firefox %u
-      Terminal=false
-      Type=Application
-      Icon=/home/{{ install_user }}/.local/firefox/browser/chrome/icons/default/default128.png
-      Categories=Network;WebBrowser;
-    owner: "{{ install_user }}"
-    group: "{{ install_user }}"
-    mode: '0644'
-
-- name: Ensure Firefox profile directory exists
-  command: firefox --headless
+    extra_opts:
+      - "--strip-components=1"
+  become: yes
   become_user: "{{ install_user }}"
-  changed_when: false
+
+
+- name: Create a symlink for Firefox in ~/.local/bin
+  ansible.builtin.file:
+    src: "{{ firefox_exec }}"
+    dest: "{{ firefox_bin_dir }}/firefox"
+    state: link
+    force: yes
+  become: yes
+  become_user: "{{ install_user }}"
+
+- name: Add Firefox path to user's profile
+  ansible.builtin.lineinfile:
+    path: "/home/{{ install_user }}/.bashrc"
+    line: 'PATH=$PATH:{{ firefox_bin_dir }}'
+    create: yes
+    backup: yes
+  become_user: "{{ install_user }}"
+
+- name: Reload .bashrc for immediate effect
+  ansible.builtin.shell:
+    cmd: ". ~/.bashrc"
+  become_user: "{{ install_user }}"
+
+
+- name: Create Firefox desktop entry
+  ansible.builtin.copy:
+    dest: "/home/{{ install_user }}/.local/share/applications/firefox.desktop"
+    content: "{{ firefox_desktop_content }}"
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0644'
+  loop:
+    - "{{ applications_dir }}/firefox.desktop"
+    - "{{ desktop_dir }}/firefox.desktop"
+  become: true
+
+
+
+- name: Run Firefox in headless mode to create a profile
+  ansible.builtin.shell:
+    cmd: "timeout 10s {{ firefox_exec }} --headless"
+  become: yes
+  become_user: "{{ install_user }}"
+  environment:
+    HOME: "/home/{{ install_user }}"
+  register: firefox_run
+  ignore_errors: yes
 
 - name: Stop Firefox if running
-  command: pkill firefox
+  ansible.builtin.command:
+    cmd: pkill firefox
   ignore_errors: yes
+  become_user: "{{ install_user }}"
+
+- name: Wait until Firefox profile folder appears
+  ansible.builtin.shell:
+    cmd: "ls /home/{{ install_user }}/.mozilla/firefox | grep '.default-release'"
+  register: profile_check
   changed_when: false
-
-
+  failed_when: profile_check.rc != 0
+  retries: 10
+  delay: 3
+  become_user: "{{ install_user }}"
 
 - name: Find Firefox profile folder
-  find:
+  ansible.builtin.find:
     paths: "/home/{{ install_user }}/.mozilla/firefox"
+    file_type: directory  
     patterns: "*.default-release"
-    recurse: no
   register: firefox_profiles
 
-- name: Debug firefox profiles
-  debug:
-    var: install_user
-
-- name: Debug firefox profiles
-  debug:
-    var: firefox_profiles
 
 - name: Set the profile directory
-  set_fact:
+  ansible.builtin.set_fact:
     firefox_profile: "{{ firefox_profiles.files[0].path | basename }}"
 
-
 - name: Generate logins.json for stored credentials
-  copy:
-    dest: "/home/{{ install_user }}/.mozilla/{{ firefox_profile }}/logins.json"
+  ansible.builtin.copy:
+    dest: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/logins.json"
     content: |
       {
         "nextId": 2,
@@ -154,7 +183,7 @@
       }
     dest: "/home/{{ install_user }}/proxy.pac"
     mode: '0644'
-  when: firefox_proxy_address is defined
+  when: firefox_proxy_address != ""
 
 - name: Configure Firefox to use the PAC file through user.js
   lineinfile:
@@ -162,8 +191,4 @@
     line: 'user_pref("network.proxy.autoconfig_url", "file:///home/{{ install_user }}/proxy.pac");'
     create: yes
     backup: yes
-  when: firefox_proxy_address is defined
-
-
-
-
+  when: firefox_proxy_address != ""
