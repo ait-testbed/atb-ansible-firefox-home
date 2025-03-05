@@ -169,6 +169,15 @@
     group: "{{ install_user }}"
     mode: '0600'
 
+
+- name: Configure Firefox to use the PAC file through user.js
+  lineinfile:
+    path: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/user.js"
+    line: 'user_pref("network.proxy.autoconfig_url", "file:///home/{{ install_user }}/proxy.pac");'
+    create: yes
+    backup: yes
+  when: firefox_proxy_address is defined
+
 - name: Create Proxy Auto-Configuration (PAC) file for Firefox
   copy:
     content: |
@@ -180,16 +189,10 @@
       }
     dest: "/home/{{ install_user }}/proxy.pac"
     mode: '0644'
-  when: firefox_proxy_address != 'omit'
+  when: firefox_proxy_address is defined
 
 
-- name: Configure Firefox to use the PAC file through user.js
-  lineinfile:
-    path: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/user.js"
-    line: 'user_pref("network.proxy.autoconfig_url", "file:///home/{{ install_user }}/proxy.pac");'
-    create: yes
-    backup: yes
-  when: firefox_proxy_address != 'omit'
+
 
 
 
