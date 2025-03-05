@@ -84,7 +84,6 @@
     cmd: ". ~/.bashrc"
   become_user: "{{ install_user }}"
 
-
 - name: Create Firefox desktop entry
   ansible.builtin.copy:
     dest: "/home/{{ install_user }}/.local/share/applications/firefox.desktop"
@@ -96,8 +95,6 @@
     - "{{ applications_dir }}/firefox.desktop"
     - "{{ desktop_dir }}/firefox.desktop"
   become: true
-
-
 
 - name: Run Firefox in headless mode to create a profile
   ansible.builtin.shell:
@@ -183,7 +180,8 @@
       }
     dest: "/home/{{ install_user }}/proxy.pac"
     mode: '0644'
-  when: firefox_proxy_address != ""
+  when: firefox_proxy_address is defined and firefox_proxy_address | length > 0
+
 
 - name: Configure Firefox to use the PAC file through user.js
   lineinfile:
@@ -191,4 +189,5 @@
     line: 'user_pref("network.proxy.autoconfig_url", "file:///home/{{ install_user }}/proxy.pac");'
     create: yes
     backup: yes
-  when: firefox_proxy_address != ""
+  when: firefox_proxy_address is defined and firefox_proxy_address | length > 0
+ 
