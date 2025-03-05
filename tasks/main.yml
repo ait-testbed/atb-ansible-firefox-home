@@ -170,26 +170,26 @@
     mode: '0600'
 
 
-- name: Configure Firefox to use the PAC file through user.js
-  lineinfile:
-    path: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/user.js"
-    line: 'user_pref("network.proxy.autoconfig_url", "file:///home/{{ install_user }}/proxy.pac");'
-    create: yes
-    backup: yes
-  when: firefox_proxy_address is defined
+# - name: Configure Firefox to use the PAC file through user.js
+#   ansible.builtin.lineinfile:
+#     path: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/user.js"
+#     line: 'user_pref("network.proxy.autoconfig_url", "file:///home/{{ install_user }}/proxy.pac");'
+#     create: yes
+#     backup: yes
+#   when: firefox_proxy_address is defined
 
-- name: Create Proxy Auto-Configuration (PAC) file for Firefox
-  copy:
-    content: |
-      function FindProxyForURL(url, host) {
-          if (url.indexOf("http://") == 0 || url.indexOf("https://") == 0) {
-              return "PROXY {{ firefox_proxy_address }}";
-          }
-          return "DIRECT";
-      }
-    dest: "/home/{{ install_user }}/proxy.pac"
-    mode: '0644'
-  when: firefox_proxy_address is defined
+# - name: Create Proxy Auto-Configuration (PAC) file for Firefox
+#   ansible.builtin.copy:
+#     content: |
+#       function FindProxyForURL(url, host) {
+#           if (url.indexOf("http://") == 0 || url.indexOf("https://") == 0) {
+#               return "PROXY {{ firefox_proxy_address }}";
+#           }
+#           return "DIRECT";
+#       }
+#     dest: "/home/{{ install_user }}/proxy.pac"
+#     mode: '0644'
+#   when: firefox_proxy_address is defined
 
 
 
