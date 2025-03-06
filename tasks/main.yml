@@ -23,7 +23,7 @@
     firefox_desktop_content: |
       [Desktop Entry]
       Name=Firefox
-      Exec="/home/{{ install_user }}/.local/bin/firefox %u
+      Exec=/home/{{ install_user }}/.local/bin/firefox %u
       Terminal=false
       Type=Application
       Icon=/home/{{ install_user }}/.local/share/firefox/browser/chrome/icons/default/default128.png
@@ -84,13 +84,13 @@
     cmd: ". ~/.bashrc"
   become_user: "{{ install_user }}"
 
-- name: Create Firefox desktop entry
+- name: Create Firefox desktop and menu entry
   ansible.builtin.copy:
     dest: "/home/{{ install_user }}/.local/share/applications/firefox.desktop"
     content: "{{ firefox_desktop_content }}"
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
-    mode: '0644'
+    mode: '0744'
   loop:
     - "{{ applications_dir }}/firefox.desktop"
     - "{{ desktop_dir }}/firefox.desktop"
