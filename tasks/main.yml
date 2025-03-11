@@ -84,17 +84,23 @@
     cmd: ". ~/.bashrc"
   become_user: "{{ install_user }}"
 
-- name: Create Firefox desktop and menu entry
+- name: Create Firefox and menu entry
   ansible.builtin.copy:
     dest: "/home/{{ install_user }}/.local/share/applications/firefox.desktop"
     content: "{{ firefox_desktop_content }}"
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
     mode: '0744'
-  loop:
-    - "{{ applications_dir }}/firefox.desktop"
-    - "{{ desktop_dir }}/firefox.desktop"
-  become: true
+    become: true
+
+- name: Create Firefox desktop  entry
+  ansible.builtin.copy:
+    dest: "{{ desktop_dir }}""
+    content: "{{ firefox_desktop_content }}"
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    mode: '0744'
+    become: true
 
 - name: Run Firefox in headless mode to create a profile
   ansible.builtin.shell:
