@@ -46,7 +46,7 @@
 
 - name: Download Firefox tarball and extract it
   ansible.builtin.get_url:
-    url: "https://download.mozilla.org/?product=firefox-developer-edition-latest&os=linux64&lang=en-US"
+    url: "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US"
     dest: "/home/{{ install_user }}/firefox.tar.bz2"
   become: yes
   become_user: "{{ install_user }}"
