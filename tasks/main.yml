@@ -95,7 +95,7 @@
 
 - name: Create Firefox desktop  entry
   ansible.builtin.copy:
-    dest: "{{ desktop_dir }}""
+    dest: "{{ desktop_dir }}"
     content: "{{ firefox_desktop_content }}"
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
