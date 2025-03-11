@@ -170,26 +170,34 @@
     mode: '0600'
 
 
-# - name: Configure Firefox to use the PAC file through user.js
-#   ansible.builtin.lineinfile:
-#     path: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/user.js"
-#     line: 'user_pref("network.proxy.autoconfig_url", "file:///home/{{ install_user }}/proxy.pac");'
-#     create: yes
-#     backup: yes
-#   when: firefox_proxy_address is defined
+- name: Configure Firefox to use HTTP, HTTPS, and SOCKS proxy through user.js
+  ansible.builtin.copy:
+    dest: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/user.js"
+    content: |
+      // Use manual proxy configuration
+      user_pref("network.proxy.type", 1);
 
-# - name: Create Proxy Auto-Configuration (PAC) file for Firefox
-#   ansible.builtin.copy:
-#     content: |
-#       function FindProxyForURL(url, host) {
-#           if (url.indexOf("http://") == 0 || url.indexOf("https://") == 0) {
-#               return "PROXY {{ firefox_proxy_address }}";
-#           }
-#           return "DIRECT";
-#       }
-#     dest: "/home/{{ install_user }}/proxy.pac"
-#     mode: '0644'
-#   when: firefox_proxy_address is defined
+      // Set HTTP proxy and port
+      user_pref("network.proxy.http", "{{ firefox_proxy_address }}");
+      user_pref("network.proxy.http_port", {{ firefox_proxy_port }});
+
+      // Set HTTPS proxy and port
+      user_pref("network.proxy.ssl", "{{ firefox_proxy_address }}");
+      user_pref("network.proxy.ssl_port", {{ firefox_proxy_port }});
+
+      // Set SOCKS proxy and port
+      user_pref("network.proxy.socks", "{{ firefox_proxy_address }}");
+      user_pref("network.proxy.socks_port", {{ firefox_proxy_port }});
+
+      // Optionally, disable proxy for local addresses
+      user_pref("network.proxy.no_proxies_on", "localhost, 127.0.0.1");
+      
+    mode: '0644'
+    owner: "{{ install_user }}"
+    group: "{{ install_user }}"
+    force: yes
+  when: firefox_proxy_address is defined and firefox_proxy_port is defined
+
 
 
 

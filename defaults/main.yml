@@ -1,2 +1,3 @@
 install_user: "judy"
-
+firefox_proxy_address: 192.168.50.254
+firefox_proxy_port: 3128
