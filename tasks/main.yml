@@ -46,14 +46,14 @@
 
 - name: Download Firefox tarball and extract it
   ansible.builtin.get_url:
-    url: "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
-    dest: "/home/{{ install_user }}/firefox-latest.tar.bz2"
+    url: "https://download.mozilla.org/?product=firefox-developer-edition-latest&os=linux64&lang=en-US"
+    dest: "/home/{{ install_user }}/firefox.tar.bz2"
   become: yes
   become_user: "{{ install_user }}"
 
 - name: Extract Firefox tarball as the install user
   ansible.builtin.unarchive:
-    src: "/home/{{ install_user }}/firefox-latest.tar.bz2"
+    src: "/home/{{ install_user }}/firefox.tar.bz2"
     dest: "{{ firefox_dir }}"
     remote_src: yes
     extra_opts:
