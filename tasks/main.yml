@@ -130,7 +130,7 @@
   ansible.builtin.find:
     paths: "/home/{{ install_user }}/.mozilla/firefox"
     file_type: directory  
-    patterns: "*.default-release"
+    patterns: "*.dev-edition-default"
   register: firefox_profiles
 
 
