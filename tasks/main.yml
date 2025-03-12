@@ -118,7 +118,7 @@
 
 - name: Wait until Firefox profile folder appears
   ansible.builtin.shell:
-    cmd: "ls /home/{{ install_user }}/.mozilla/firefox | grep '.default-release'"
+    cmd: "ls /home/{{ install_user }}/.mozilla/firefox | grep '.dev-edition-default'"
   register: profile_check
   changed_when: false
   failed_when: profile_check.rc != 0
