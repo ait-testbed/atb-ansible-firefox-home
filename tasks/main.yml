@@ -200,12 +200,19 @@
 
       // Optionally, disable proxy for local addresses
       user_pref("network.proxy.no_proxies_on", "localhost, 127.0.0.1");
-      
     mode: '0644'
     owner: "{{ install_user }}"
     group: "{{ install_user }}"
     force: yes
   when: firefox_proxy_address is defined and firefox_proxy_port is defined
+
+- name: Append to user.js to allow unsigned extensions if allowed
+  ansible.builtin.lineinfile:
+    path: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/user.js"
+    line: 'user_pref("xpinstall.signatures.required", false);'
+    create: yes
+  when: allow_unsigned_extension | default(false) == true
+
 
 
 
