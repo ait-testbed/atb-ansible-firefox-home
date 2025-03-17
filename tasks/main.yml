@@ -193,6 +193,11 @@
       user_pref("network.proxy.socks", "{{ firefox_proxy_address }}");
       user_pref("network.proxy.socks_port", {{ firefox_proxy_port }});
 
+      // Set WebSocket proxy support (WebSockets typically use HTTP/HTTPS proxies)
+      // user_pref("network.websocket.proxy", true);  // Enable WebSocket proxy support
+      // user_pref("network.websocket.http.proxy", "{{ firefox_proxy_address }}"); // WebSocket proxy address
+      // user_pref("network.websocket.http.port", {{ firefox_proxy_port }}); // WebSocket proxy port
+
       // Optionally, disable proxy for local addresses
       user_pref("network.proxy.no_proxies_on", "localhost, 127.0.0.1");
       
