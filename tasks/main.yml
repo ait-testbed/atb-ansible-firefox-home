@@ -211,7 +211,7 @@
     path: "/home/{{ install_user }}/.mozilla/firefox/{{ firefox_profile }}/user.js"
     line: 'user_pref("xpinstall.signatures.required", false);'
     create: yes
-  when: allow_unsigned_extension 
+  when: allow_unsigned_extensions 
 
 
 
